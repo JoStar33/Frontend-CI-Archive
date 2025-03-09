@@ -1,0 +1,50 @@
+name: frontend-ci
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+jobs:
+  Check-Changes:
+    name: Check Test Code Changes
+    runs-on: ubuntu-latest
+    outputs:
+      test_changed: ${{ steps.test-changes.outputs.changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Check for test code changes
+        id: test-changes
+        run: |
+          CHANGED_FILES=$(git diff --name-only HEAD^1 HEAD)
+          if echo "$CHANGED_FILES" | grep -E "(\.test\.(js|jsx|ts|tsx)|\.spec\.(js|jsx|ts|tsx))"; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  Lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.9.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
