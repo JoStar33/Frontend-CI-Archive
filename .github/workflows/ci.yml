@@ -48,3 +48,27 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+  Test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: Check-Changes
+    if: needs.Check-Changes.outputs.test_changed == 'true'
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm test -- --run
