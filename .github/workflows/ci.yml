@@ -3,6 +3,7 @@ on:
   pull_request:
     types: [opened, ready_for_review, synchronize]
 
+# 개발자 코드내에서 테스트 코드의 변경사항을 감지함. 이후 변경된 테스트 코드가 있다면, 테스트를 진행한다.
 jobs:
   Check-Changes:
     name: Check Test Code Changes
@@ -53,7 +54,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     needs: Check-Changes
-    if: needs.Check-Changes.outputs.test_changed == 'true'
+    if: needs.Check-Changes.outputs.test_changed == 'true' # 위에서 진행한 job인 Check-Changes의 정보에서 test_changed를 가지고옴. true라면 Test를 진행.
     steps:
       - uses: actions/checkout@v3
 
